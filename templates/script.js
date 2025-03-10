@@ -213,7 +213,7 @@ if (document.querySelector('.cursor-window')) {
 
 // Function to reload the page when Ctrl+B is pressed
 document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.key === 'b') {
+    if (event.ctrlKey && event.key === 'r') {
         event.preventDefault(); // Prevent the default action
         location.reload(); // Reload the page
     }
@@ -398,6 +398,102 @@ function openApp(name) {
         }
 
         localStorage.setItem('currentFocus', 'Cursor')
+        document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus')
+    } else if (name == 'settings' && localStorage.getItem('settingsMinimized') != 'true') {
+        windowsSection.innerHTML += `
+            <div class="window settings-window">
+                <div class="window-top-bar settings-window-top-bar">
+                    <button class="window-top-bar-button settings-window-top-bar-button close" style="margin-left: 20px;" onclick='localStorage.setItem("currentFocus", "Finder"); document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem("currentFocus"); localStorage.setItem("settingsMinimized", "false"); document.querySelector(".underline-element").remove(); this.parentElement.parentElement.style.animation = "fadeOut 0.2s ease-in-out"; setTimeout(() => { this.parentElement.parentElement.remove(); }, 100)'></button>
+                    <button class="window-top-bar-button settings-window-top-bar-button minimize" onclick='this.parentElement.parentElement.hidden = true; localStorage.setItem("settingsMinimized", "true"); localStorage.setItem("currentFocus", "Finder"); document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem("currentFocus");'></button>
+                    <button class="window-top-bar-button settings-window-top-bar-button expand" onclick='
+                        let windowElement = this.parentElement.parentElement;
+                        localStorage.setItem("settingsMinimized", "false");
+                        if (windowElement.style.height === "95vh" && windowElement.style.width === "100vw") {
+                            windowElement.style.height = "70%";
+                            windowElement.style.width = "50%";
+                        } else {
+                            windowElement.style.height = "95vh";
+                            windowElement.style.width = "100vw";
+                            localStorage.setItem("settingsWindowHeight", windowElement.style.height)
+                            windowElement.style.marginTop = "10px";
+                            windowElement.style.postion = "absolute";
+                            windowElement.style.top = "50%"
+                            windowElement.style.left = "50%"
+                            windowElement.style.transform = "translate(-50%, -50%)"
+                        }
+                        windowElement.style.transition = "all 0.2s ease-in-out";
+                    '></button>
+                </div>
+
+                <div class='settings-left-column'>
+                    <button>About this Mac</button>
+                </div>
+            </div>
+        `
+
+        function updateSettingsLeftColumnHeight() {
+            const windowHeight = Number(getComputedStyle(document.querySelector('.window')).height.replace('px', ''));
+            document.querySelector('.settings-left-column').style.height = (windowHeight - 52) + 'px';
+        }
+        
+        // Initial height update
+        updateSettingsLeftColumnHeight();
+
+        setInterval(() => {
+            let windowOldHeight;
+            let windowNewHeight;
+            if (document.querySelector('.settings-window')) {
+                windowOldHeight = getComputedStyle(document.querySelector('.window')).height;
+                windowNewHeight = Number(localStorage.getItem('settingsWindowHeight').replace('vh', '')) + 265 + 'px';
+            }
+            if (windowOldHeight != windowNewHeight) {
+                updateSettingsLeftColumnHeight()
+            } else {
+                null
+            }
+        }, 1)
+
+        if (document.querySelector(`.settings-window`)) {
+            // Get the window-top-bar element
+            const windowTopBarElement = document.querySelector('.settings-window-top-bar');
+
+            // Variables to store the mouse position and the window's initial position
+            let mouseX, mouseY, initialX, initialY;
+
+            // Event listener for mousedown
+            windowTopBarElement.addEventListener('mousedown', (e) => {
+                // Store the initial mouse position and the window's initial position
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                initialX = windowTopBarElement.parentElement.offsetLeft;
+                initialY = windowTopBarElement.parentElement.offsetTop;
+                
+                // Add event listeners for mousemove and mouseup
+                document.addEventListener('mousemove', dragWindow);
+                document.addEventListener('mouseup', stopDragging);
+            });
+
+            // Function to drag the window
+            function dragWindow(e) {
+                // Calculate the new position of the window
+                const newX = initialX + (e.clientX - mouseX);
+                const newY = initialY + (e.clientY - mouseY);
+                document.querySelector('.window').style.transition = "none";
+                
+                // Update the window's position
+                windowTopBarElement.parentElement.style.top = `${newY}px`;
+                windowTopBarElement.parentElement.style.left = `${newX}px`;
+            }
+
+            // Function to stop dragging
+            function stopDragging() {
+                // Remove event listeners for mousemove and mouseup
+                document.removeEventListener('mousemove', dragWindow);
+                document.removeEventListener('mouseup', stopDragging);
+            }
+        }
+
+        localStorage.setItem('currentFocus', 'Settings')
         document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus')
     } else {
         document.querySelector('.window').style.animation = 'fadeIn 0.1s ease-in-out'

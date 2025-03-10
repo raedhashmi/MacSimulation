@@ -1,3 +1,5 @@
+# All code was written by raedhashmi
+
 from flask import Flask, send_file
 import webview
 import signal
