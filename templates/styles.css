@@ -510,6 +510,11 @@ body {
     flex-wrap: wrap;
     gap: 18px;
     min-height: 120px;
+    outline: none;
+}
+
+.finder-file-list:active {
+    outline: none;
 }
 
 .finder-file-item {
@@ -536,6 +541,59 @@ body {
 .finder-file-icon {
     font-size: 28px;
     margin-bottom: 12px;
+}
+
+.finder-delete-dialog-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.25);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+}
+
+.finder-delete-dialog-box {
+    background: #232323;
+    color: #fff;
+    padding: 32px 28px 20px 28px;
+    border-radius: 14px;
+    box-shadow: 0 4px 32px #0008;
+    min-width: 320px;
+    text-align: center;
+    font-family: system-ui,sans-serif;
+    animation: fadeIn 0.15s;
+}
+
+.finder-delete-dialog-message {
+    margin-bottom: 1.2em;
+    font-size: 1.1em;
+}
+
+.finder-delete-dialog-delete {
+    background: #ff3b30;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 28px;
+    font-size: 1em;
+    transition: background 0.15s;
+}
+
+.finder-delete-dialog-delete:hover {
+    background: #d32f2f;
+}
+
+.finder-delete-dialog-cancel {
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 28px;
+    font-size: 1em;
+    transition: background 0.15s;
+}
+
+.finder-delete-dialog-cancel:hover {
+    background: #333;
 }
 
 .finder-drop-overlay {
@@ -648,7 +706,6 @@ body {
     color: #fff;
     font-size: 1.08em;
     font-weight: 500;
-    cursor: pointer;
     box-shadow: 0 1px 2px #0002;
     transition: background 0.15s, box-shadow 0.15s;
 }
@@ -667,7 +724,6 @@ body {
     color: #fff;
     font-size: 1.05em;
     font-weight: 500;
-    cursor: pointer;
     box-shadow: 0 1px 4px #0002;
     transition: background 0.15s, box-shadow 0.15s;
     outline: none;
@@ -740,7 +796,6 @@ body {
     border-radius: 8px;
     font-size: 1.18em;
     padding: 18px 0;
-    cursor: pointer;
     transition: background 0.13s, color 0.13s, box-shadow 0.13s;
     font-family: inherit;
     box-shadow: none;
@@ -830,7 +885,6 @@ body {
     border: none;
     color: #ff5f56;
     font-size: 1.18em;
-    cursor: pointer;
     margin-left: 10px;
     border-radius: 6px;
     padding: 4px 8px;
@@ -876,7 +930,6 @@ body {
     padding: 9px 22px;
     font-size: 1em;
     font-weight: 500;
-    cursor: pointer;
     box-shadow: none;
     transition: background 0.15s;
     letter-spacing: 0.02em;

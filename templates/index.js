@@ -393,8 +393,6 @@ function openApp(name) {
             if (expandBtn) expandBtn.onclick = () => handleExpand('finder-window', 'finderMinimized');
         }, 50);
 
-        setInterval(() => setupDraggable('finder'), 1)
-
         // --- Finder file system simulation with persistence ---
         let fakeFS = JSON.parse(localStorage.getItem('finder-fakeFS')) || {
             '/': [
@@ -442,11 +440,16 @@ function openApp(name) {
             fileList.innerHTML = '';
             currentPath = path;
             renderPathBar(path);
-            const items = fakeFS[path] || [];
-            let lastHoveredIdx = null;
+            let items = fakeFS[path] || [];
+            items = items.slice().sort((a, b) => {
+                if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+                return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+            });
+            // Removed lastHoveredIdx and hover logic
             items.forEach((item, idx) => {
                 const el = document.createElement('div');
                 el.className = 'finder-file-item ' + item.type;
+                el.dataset.originalIdx = fakeFS[path].findIndex(f => f.name === item.name && f.type === item.type);
                 if (focusNewName && item.name === focusNewName && item.type === focusType) {
                     el.innerHTML = `<span class="finder-file-icon">${item.type === 'folder' ? '📁' : '📄'}</span> <input type="text" class="finder-rename-input" value="${focusNewName}" autofocus />`;
                     const input = el.querySelector('input');
@@ -496,9 +499,6 @@ function openApp(name) {
                             renderFileList(newPath);
                         });
                     }
-                    // Track hover for delete
-                    el.addEventListener('mouseenter', () => { lastHoveredIdx = idx; });
-                    el.addEventListener('mouseleave', () => { if (lastHoveredIdx === idx) lastHoveredIdx = null; });
                 }
                 // Right click: show dropdown menu for item
                 el.addEventListener('contextmenu', (e) => {
@@ -507,24 +507,8 @@ function openApp(name) {
                 });
                 fileList.appendChild(el);
             });
-            // Listen for Delete key to delete hovered folder
-            fileList.onkeydown = (e) => {
-                if (e.key === 'Delete' && lastHoveredIdx !== null) {
-                    const item = items[lastHoveredIdx];
-                    if (item && item.type === 'folder') {
-                        if (confirm(`Delete folder '${item.name}'?`)) {
-                            const folderPath = path === '/' ? `/${item.name}` : `${path}/${item.name}`;
-                            Object.keys(fakeFS).forEach(k => {
-                                if (k === folderPath || k.startsWith(folderPath + '/')) delete fakeFS[k];
-                            });
-                            items.splice(lastHoveredIdx, 1);
-                            saveFS();
-                            renderFileList(path);
-                        }
-                    }
-                }
-            };
-            fileList.tabIndex = 0; // Make focusable for key events
+            // Removed Delete key handler for hovered item
+            fileList.tabIndex = 0;
         }
 
         // Finder dropdown menu logic
@@ -614,55 +598,34 @@ function openApp(name) {
                         input.addEventListener('blur', finishRename);
                         input.addEventListener('keydown', finishRename);
                     } else if (action === 'delete' && item && idx !== null) {
-                        // Custom confirmation box instead of confirm
                         function deleteConfirmationBox(message, onConfirm, onCancel) {
                             // Remove any existing box
                             const existing = document.getElementById('delete-confirmation-box');
                             if (existing) existing.remove();
 
                             const boxDiv = document.createElement('div');
-                            boxDiv.id = 'delete-confirmation-box';
+                            boxDiv.id = 'finder-delete-dialog-overlay';
                             boxDiv.style.cssText = `
                                 position: fixed;
-                                top: 0; left: 0; width: 100vw; height: 100vh;
-                                background: rgba(0,0,0,0.3);
-                                display: flex; align-items: center; justify-content: center;
-                                z-index: 99999;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0, 0, 0, 0.5);
+                                z-index: 1000;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                transform: none;
                             `;
                             boxDiv.innerHTML = `
-                                <div style="
-                                    background: #222;
-                                    color: #fff;
-                                    padding: 32px 24px 20px 24px;
-                                    border-radius: 12px;
-                                    box-shadow: 0 4px 32px #0008;
-                                    min-width: 320px;
-                                    text-align: center;
-                                    font-family: system-ui,sans-serif;
-                                ">
+                                <div class='finder-delete-dialog-box'>
                                     <div style="margin-bottom: 0.7em;">
                                         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Warning" style="width:48px;height:48px;"/>
                                     </div>
-                                    <div style="margin-bottom: 1.2em; font-size: 1.1em;">${message}</div>
-                                    <button id="delete-confirmation-box-ok" style="
-                                        background: #ff0000;
-                                        color: #fff;
-                                        border: none;
-                                        border-radius: 6px;
-                                        padding: 8px 24px;
-                                        font-size: 1em;
-                                        margin-right: 12px;
-                                        cursor: pointer;
-                                    ">Delete</button>
-                                    <button id="delete-confirmation-box-cancel" style="
-                                        background: #444;
-                                        color: #fff;
-                                        border: none;
-                                        border-radius: 6px;
-                                        padding: 8px 24px;
-                                        font-size: 1em;
-                                        cursor: pointer;
-                                    ">Cancel</button>
+                                    <div class='finder-delete-dialog-message'>${message}</div>
+                                    <button class='finder-delete-dialog-delete' id="delete-confirmation-box-ok">Delete</button>
+                                    <button class='finder-delete-dialog-cancel' id="delete-confirmation-box-cancel">Cancel</button>
                                 </div>
                             `;
                             document.body.appendChild(boxDiv);
@@ -701,13 +664,17 @@ function openApp(name) {
                         a.download = item.name;
                         a.click();
                     } else if (action === 'new-folder') {
-                        const folderName = prompt('Enter folder name:');
-                        if (folderName && !fakeFS[currentPath].some(f => f.name === folderName && f.type === 'folder')) {
-                            fakeFS[currentPath].push({ name: folderName, type: 'folder' });
-                            fakeFS[currentPath === '/' ? `/${folderName}` : `${currentPath}/${folderName}`] = [];
-                            saveFS();
-                            renderFileList(currentPath);
+                        const folderName = 'New Folder';
+                        let baseName = folderName;
+                        let i = 1;
+                        // Find unique name by appending number if needed
+                        while (fakeFS[currentPath].some(f => f.name === baseName && f.type === 'folder')) {
+                            baseName = `${folderName} ${i++}`;
                         }
+                        fakeFS[currentPath].push({ name: baseName, type: 'folder' });
+                        fakeFS[currentPath === '/' ? `/${baseName}` : `${currentPath}/${baseName}`] = [];
+                        saveFS();
+                        renderFileList(currentPath, baseName, 'folder');
                     } else if (action === 'upload') {
                         const input = document.querySelector('.finder-upload-input');
                         input.value = '';
@@ -758,7 +725,6 @@ function openApp(name) {
             renderFileList(currentPath);
         }
 
-        // Sidebar navigation
         setTimeout(() => {
             document.querySelectorAll('.finder-sidebar li').forEach(li => {
                 li.onclick = function() {
@@ -770,7 +736,6 @@ function openApp(name) {
             renderFileList('/');
         }, 100);
 
-        // --- Drag and drop folder import ---
         setTimeout(() => {
             const fileListDiv = document.getElementById('finder-file-list');
             const dropOverlay = document.getElementById('finder-drop-overlay');
@@ -830,7 +795,6 @@ function openApp(name) {
             });
         }
 
-        // --- Only right click (secondary click) on empty space for dropdown ---
         setTimeout(() => {
             const finder = document.querySelector('.finder-content');
             const finderFileList = document.getElementById('finder-file-list')
@@ -844,6 +808,8 @@ function openApp(name) {
             }
             });
         }, 100);
+
+        setInterval(() => setupDraggable('finder'), 1)
 
         localStorage.setItem('currentFocus', 'Finder')
         document.querySelector('.currently-focused-instance-name').textContent = localStorage.getItem('currentFocus');
