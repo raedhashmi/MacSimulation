@@ -1,5 +1,5 @@
-let boot = false;
-let login = false;
+let boot = true;
+let login = true;
 
 function handleScreenTransition(showScreen, hideScreen, showAnimation, hideAnimation, delay = 14000, transitionTime = 500) {
     document.querySelector(hideScreen).style.display = "block";
