@@ -8,7 +8,23 @@
 </head>
 <body>
     <main>
-        
+        <img id="custom-cursor" src="resources/cursor.png" alt="Custom Cursor" style="position: absolute; pointer-events: none; z-index: 100; height: 22px; width: auto;" hidden onload="
+            document.addEventListener('DOMContentLoaded', () => {
+                const customCursor = document.getElementById('custom-cursor');
+
+                document.addEventListener('mousemove', (e) => {
+                    if (e.clientY != 0 || e.clientX != 0) {
+                        customCursor.style.left = `${e.clientX - 2}px`;
+                        customCursor.style.top = `${e.clientY - 2}px`;
+                        customCursor.hidden = false // Show the custom cursor
+                    }
+                });
+
+                document.addEventListener('mouseleave', (e) => {
+                    customCursor.hidden = true;
+                })
+            });
+        ">
 
         <div class="boot-screen" style="display: none;">
             <img src="resources/appleDarkVersion.png" alt="Apple Logo" class="boot-screen-logo">
