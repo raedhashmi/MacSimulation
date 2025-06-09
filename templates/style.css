@@ -6,7 +6,7 @@ body {
     background-size: cover;
     background-position: 50% 0%;
     user-select: none;
-    cursor: url('cursor.png');
+    cursor: none;
     font-family: 'SF Pro';
     --center-from-top: 50%;
     --center-from-side: 50%;
