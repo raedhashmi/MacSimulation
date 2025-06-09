@@ -8,23 +8,7 @@
 </head>
 <body>
     <main>
-        <img id="custom-cursor" src="resources/cursor.png" alt="Custom Cursor" style="position: absolute; pointer-events: none; z-index: 100; height: 22px; width: auto;" hidden onload="
-            document.addEventListener('DOMContentLoaded', () => {
-                const customCursor = document.getElementById('custom-cursor');
-
-                document.addEventListener('mousemove', (e) => {
-                    if (e.clientY != 0 || e.clientX != 0) {
-                        customCursor.style.left = `${e.clientX - 2}px`;
-                        customCursor.style.top = `${e.clientY - 2}px`;
-                        customCursor.hidden = false // Show the custom cursor
-                    }
-                });
-
-                document.addEventListener('mouseleave', (e) => {
-                    customCursor.hidden = true;
-                })
-            });
-        ">
+        
 
         <div class="boot-screen" style="display: none;">
             <img src="resources/appleDarkVersion.png" alt="Apple Logo" class="boot-screen-logo">
@@ -65,7 +49,7 @@
             <div class="dock">
                 <div class="dock-apps">
                     <div class="dock-app-container">
-                        <img src="https://www.macos-web.app/app-icons/finder/256.png" alt="" draggable="false" class="finder-icon">
+                        <img src="https://www.macos-web.app/app-icons/finder/256.png" alt="" draggable="false" onclick="openApp('finder')" class="finder-icon">
                         <span hidden class="app-label finder-label">Finder</span>
                     </div>
                     <div class="dock-app-container">
@@ -77,8 +61,8 @@
                         <span hidden class="app-label vscode-label">VS Code</span>
                     </div>
                     <div class="dock-app-container">
-                        <img src="https://www.macos-web.app/app-icons/notes/256.png" alt="" draggable="false" onclick="openApp('notes')" class="notes-icon">
-                        <span hidden class="app-label notes-label">Notes</span>
+                        <img src="https://www.macos-web.app/app-icons/calculator/256.png" alt="" draggable="false" onclick="openApp('calculator')" class="clock-icon">
+                        <span hidden class="app-label notes-label">Calcualtor</span>
                     </div>
                     <div class="dock-app-container">
                         <img src="resources/UltraGPTLogo.png" alt="" draggable="false" onclick="openApp('ultragpt')" class="ultragpt-icon">
