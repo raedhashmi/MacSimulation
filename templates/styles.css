@@ -1092,6 +1092,42 @@ body {
     margin-bottom: 12px;
 }
 
+.settings-success-box {
+  background: #1db954;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 7px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1em;
+}
+
+.settings-success-dismiss {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.2em;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.settings-input {
+  font-size: 16px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #3a3a3c;
+  background: #1c1c1e;
+  color: white;
+}
+
+.settings-modal-error {
+  display: none;
+  color: red;
+  margin-top: 10px;
+}
+
 .settings-button {
     background: #232323;
     color: #fff;

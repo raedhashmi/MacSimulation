@@ -1,5 +1,5 @@
-let boot = true;
-let login = true;
+let boot = false;
+let login = false;
 
 function handleScreenTransition(showScreen, hideScreen, showAnimation, hideAnimation, delay = 14000, transitionTime = 500) {
     document.querySelector(hideScreen).style.display = "block";
@@ -1192,7 +1192,7 @@ function openApp(name) {
                     <div class="settings-section" id="about-section" style="display:none">
                         <h2>About This Mac</h2>
                         <div class="about-mac-info">
-                            <p>macOS Ventura<br>Version 13.4<br>MacBook Pro (13-inch, M1, 2020)</p>
+                            <p>macOS Sequoia<br>Version 15.11<br>MacBook Pro (13-inch, M1, 2020)</p>
                             <p>Chip: Apple M1<br>Memory: 8 GB</p>
                         </div>
                         <button class="settings-learn-more">Learn More...</button>
@@ -1247,7 +1247,6 @@ function openApp(name) {
             if (expandBtn) expandBtn.onclick = () => handleExpand('settings-window', 'settingsMinimized');
         }, 50);
 
-        // Sidebar switching logic
         setTimeout(() => {
             document.querySelectorAll('.settings-sidebar li').forEach(item => {
                 item.addEventListener('click', function() {
@@ -1258,7 +1257,104 @@ function openApp(name) {
                 });
             });
 
-            // Edit Profile button logic
+            function showUserSection(name, successMsg) {
+                const userSection = document.getElementById('users-section');
+                let msgBox = '';
+                if (successMsg) {
+                    msgBox = `<div class="settings-success-box">
+                        <span>${successMsg}</span>
+                        <button id="dismiss-success-msg" class="settings-success-dismiss">&times;</button>
+                    </div>`;
+                }
+                userSection.innerHTML = `
+                    ${msgBox}
+                    <h2>${name}</h2>
+                    <div class="user-profile">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="Profile" class="user-profile-img"/>
+                        <div class="user-profile-info">
+                            <h3>${name}</h3>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="settings-button" id="edit-profile-btn">Edit Profile</button>
+                        <button class="settings-button" id="change-password-btn">Change Password</button>
+                    </div>
+                `;
+                if (successMsg) {
+                    document.getElementById('dismiss-success-msg').onclick = function() {
+                        document.querySelector('.settings-success-box').remove();
+                    };
+                }
+                // Re-attach edit/cancel logic
+                const editBtn = document.getElementById('edit-profile-btn');
+                if (editBtn) {
+                    editBtn.onclick = function() {
+                        const username = localStorage.getItem('account-username') || 'User 1';
+                        const userSection = document.getElementById('users-section');
+                        userSection.innerHTML = `
+                            <h2>Edit Profile</h2>
+                            <div class="user-profile">
+                                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="Profile" class="user-profile-img"/>
+                                <div class="user-profile-info">
+                                    <input type="text" id="edit-username-input" value="${username}" class="settings-modal-field settings-input" />
+                                    <p>Administrator</p>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="settings-button" id="save-username-btn">Save</button>
+                                <button class="settings-button" id="cancel-edit-btn">Cancel</button>
+                            </div>
+                        `;
+                        document.getElementById('save-username-btn').onclick = function() {
+                            const newName = document.getElementById('edit-username-input').value.trim();
+                            if (newName) {
+                                localStorage.setItem('account-username', newName);
+                                showUserSection(newName, 'Your username has been changed.');
+                            }
+                        };
+                        document.getElementById('cancel-edit-btn').onclick = function() {
+                            showUserSection(username);
+                        };
+                    };
+                }
+                const passBtn = document.getElementById('change-password-btn');
+                if (passBtn) {
+                    passBtn.onclick = function() {
+                        const username = localStorage.getItem('account-username') || 'User 1';
+                        const userSection = document.getElementById('users-section');
+                        userSection.innerHTML = `
+                            <h2>Change Password</h2>
+                            <div class="settings-modal-field">
+                                <label>New Password</label>
+                                <input type="password" id="new-password-input" class="settings-modal-field settings-input" />
+                                <label>Confirm Password</label>
+                                <input type="password" id="confirm-password-input" class="settings-modal-field settings-input" />
+                                <div id="password-error" class="settings-modal-error">Passwords do not match.</div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="settings-button" id="save-password-btn">Save</button>
+                                <button class="settings-button" id="cancel-password-btn">Cancel</button>
+                            </div>
+                        `;
+                        document.getElementById('password-error').style.display = 'none';
+                        document.getElementById('save-password-btn').onclick = function() {
+                            const newPass = document.getElementById('new-password-input').value;
+                            const confirmPass = document.getElementById('confirm-password-input').value;
+                            if (newPass && newPass === confirmPass) {
+                                localStorage.setItem('account-password', newPass);
+                                showUserSection(username, 'Your password has been changed.');
+                            } else {
+                                document.getElementById('password-error').style.display = 'block';
+                            }
+                        };
+                        document.getElementById('cancel-password-btn').onclick = function() {
+                            showUserSection(username);
+                        };
+                    };
+                }
+            }
+
             const editBtn = document.getElementById('edit-profile-btn');
             if (editBtn) {
                 editBtn.onclick = function() {
@@ -1281,15 +1377,16 @@ function openApp(name) {
                         const newName = document.getElementById('edit-username-input').value.trim();
                         if (newName) {
                             localStorage.setItem('account-username', newName);
-                            openApp('settings');
+                            // Show user section with success message
+                            showUserSection(newName, 'Your username has been changed.');
                         }
                     };
                     document.getElementById('cancel-edit-btn').onclick = function() {
-                        openApp('settings');
+                        showUserSection(username);
                     };
                 };
             }
-            // Change Password button logic
+
             const passBtn = document.getElementById('change-password-btn');
             if (passBtn) {
                 passBtn.onclick = function() {
@@ -1313,13 +1410,14 @@ function openApp(name) {
                         const confirmPass = document.getElementById('confirm-password-input').value;
                         if (newPass && newPass === confirmPass) {
                             localStorage.setItem('account-password', newPass);
-                            openApp('settings');
+                            // Show user section with success message
+                            showUserSection(username, 'Your password has been changed.');
                         } else {
                             document.getElementById('password-error').style.display = 'block';
                         }
                     };
                     document.getElementById('cancel-password-btn').onclick = function() {
-                        openApp('settings');
+                        showUserSection(username);
                     };
                 };
             }
