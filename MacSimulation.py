@@ -1,8 +1,6 @@
-from flask import Flask, send_file, request, jsonify
-import subprocess
+from flask import Flask, send_file, jsonify
 import webview
 import time
-import os
 
 app = Flask(__name__)
 
