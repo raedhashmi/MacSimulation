@@ -1,5 +1,5 @@
-let boot = true;
-let login = true;
+let boot = false;
+let login = false;
 
 function handleScreenTransition(showScreen, hideScreen, showAnimation, hideAnimation, delay = 14000, transitionTime = 500) {
     document.querySelector(hideScreen).style.display = "block";
@@ -110,7 +110,7 @@ updateTopToolbarDateTime();
 // Update every second
 setInterval(updateTopToolbarDateTime, 1000);
 
-const appIconNames = ['Finder', 'Safari', 'VSCode', 'Notes', 'UltraGPT', 'Reminders']
+const appIconNames = ['Finder', 'Safari', 'VSCode', 'Notes', 'UltraGPT', 'Campfire', 'Reminders']
 const appIcons = document.querySelectorAll('.dock img');
 
 appIcons.forEach((icon, index) => {
@@ -1068,6 +1068,32 @@ function openApp(name) {
         setInterval(() => setupDraggable('ultragpt'), 1);
 
         localStorage.setItem('currentFocus', 'UltraGPT');
+        document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus');
+    } else if (name == 'campfire' && localStorage.getItem('campfireMinimized') != 'true') {
+        windowsSection.innerHTML += `
+            <div class="window campfire-window">
+                <div class="window-top-bar campfire-window-top-bar">
+                    <button class="window-top-bar-button campfire-window-top-bar-button close" style="margin-left: 20px;"></button>
+                    <button class="window-top-bar-button campfire-window-top-bar-button minimize"></button>
+                    <button class="window-top-bar-button campfire-window-top-bar-button expand"></button>
+                </div>
+                <iframe class='campfire-iframe' src="https://campfire.up.railway.app" style='height: 100%; width: 100%;' frameborder="0"></iframe>
+            </div>
+        `;
+
+        // Attach event listeners to the buttons
+        setTimeout(() => {
+            const closeBtn = document.querySelector('.campfire-window .campfire-window-top-bar-button.close');
+            const minimizeBtn = document.querySelector('.campfire-window .campfire-window-top-bar-button.minimize');
+            const expandBtn = document.querySelector('.campfire-window .campfire-window-top-bar-button.expand');
+            if (closeBtn) closeBtn.onclick = () => handleClose('campfire-window', 'campfireMinimized');
+            if (minimizeBtn) minimizeBtn.onclick = () => handleMinimize('campfire-window', 'campfireMinimized', 'Campfire');
+            if (expandBtn) expandBtn.onclick = () => handleExpand('campfire-window', 'campfireMinimized');
+        }, 50);
+
+        setInterval(() => setupDraggable('campfire'), 1);
+
+        localStorage.setItem('currentFocus', 'Campfire');
         document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus');
     } else if (name == 'reminders' && localStorage.getItem('remindersMinimized') != 'true') {
         windowsSection.innerHTML += `

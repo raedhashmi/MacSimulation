@@ -8,7 +8,7 @@
 </head>
 <body>
     <main>
-        <img id="custom-cursor" src="resources/cursor.png" alt="Custom Cursor" style="position: absolute; pointer-events: none; z-index: 9999; height: 22px; width: auto;" hidden onload="
+        <img id="custom-cursor" src="resources/cursor.png" alt="Custom Cursor" style="position: absolute; pointer-events: none; z-index: 100; height: 22px; width: auto;" onload="
             document.addEventListener('DOMContentLoaded', () => {
                 const customCursor = document.getElementById('custom-cursor');
 
@@ -83,6 +83,10 @@
                     <div class="dock-app-container">
                         <img src="resources/UltraGPTLogo.png" alt="" draggable="false" onclick="openApp('ultragpt')" class="ultragpt-icon">
                         <span hidden class="app-label ultragpt-label">UltraGPT</span>
+                    </div>
+                    <div class="dock-app-container">
+                        <img src="https://campfire.up.railway.app/resources/favicon.ico" alt="" draggable="false" onclick="openApp('campfire')" class="campfire-icon">
+                        <span hidden class="app-label campfire-label">Campfire</span>
                     </div>
                     <div class="dock-app-container">
                         <img src="https://www.macos-web.app/app-icons/reminders/256.png" class="reminders-icon" alt="" draggable="false" onclick="openApp('reminders')">
