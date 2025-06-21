@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['E:\\PythonStuff\\MacSimulation\\MacSimulation.py'],
+    ['MacSimulation.py'],
     pathex=[],
     binaries=[],
-    datas=[('E:\\PythonStuff\\MacSimulation\\templates', 'templates/'), ('E:\\PythonStuff\\MacSimulation\\UltraGPT', 'UltraGPT/')],
+    datas=[('templates', 'templates/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['E:\\PythonStuff\\MacSimulation\\templates\\appleDarkVersion.ico'],
+    icon=['templates\\appleDarkVersion.ico'],
 )
