@@ -302,6 +302,7 @@ body {
     margin-top: 2.07px;
     width: 33.5px;
     height: auto;
+    border-radius: 9px;
 }
 
 .dock-app-container .vscode-icon {
@@ -322,6 +323,13 @@ body {
     padding: 5px;
     background-color: #121212;
     border-radius: 9px;
+}
+
+.dock-app-container .sentrix-icon {
+    margin-top: 2.2px;
+    margin-left: 1px;
+    width: 31.5px;
+    height: auto;
 }
 
 .finder-icon, .safari-icon, .notes-icon, .ultragpt-icon, .reminders-icon {
@@ -755,7 +763,6 @@ body {
     border: none;
     width: 100%;
     height: calc(100% - 44px - 36px);
-    min-height: 300px;
     border-radius: 0 0 12px 12px;
     box-shadow: 0 2px 16px #0002 inset;
 }

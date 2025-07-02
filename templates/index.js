@@ -1,5 +1,5 @@
-let boot = true;
-let login = true;
+let boot = false;
+let login = false;
 
 function handleScreenTransition(showScreen, hideScreen, showAnimation, hideAnimation, delay = 14000, transitionTime = 500) {
     document.querySelector(hideScreen).style.display = "block";
@@ -82,7 +82,7 @@ function loginUser() {
         document.querySelector('.start-screen-password').style.border = '2px #ff0000 solid'
         document.querySelector('.start-screen-password').style.animation = 'vibrate 0.2s linear'
         setTimeout(() => {
-            document.querySelector('.start-screen-password').style.animation = 'nonr'
+            document.querySelector('.start-screen-password').style.animation = 'none'
         }, 300)
     }
 }
@@ -110,7 +110,7 @@ updateTopToolbarDateTime();
 // Update every second
 setInterval(updateTopToolbarDateTime, 1000);
 
-const appIconNames = ['Finder', 'Safari', 'VSCode', 'Notes', 'UltraGPT', 'Campfire', 'Reminders']
+const appIconNames = ['Finder', 'Safari', 'VSCode', 'Sentrix', 'Notes', 'UltraGPT', 'Campfire', 'Reminders']
 const appIcons = document.querySelectorAll('.dock img');
 
 appIcons.forEach((icon, index) => {
@@ -276,6 +276,26 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
+window.addEventListener("message", (event) => {
+  if (event.data === "sentrix_handshake") {
+    event.source.postMessage("mac_sim_ack", event.origin);
+    return;
+  }
+
+  if (!event.data || !event.data.type) return;
+
+  if (event.data.type === "getFS") {
+    event.source.postMessage({
+      type: "fsSnapshot",
+      fs: localStorage.getItem("finder-fakeFS")
+    }, "*");
+  }
+
+  if (event.data.type === "updateFS") {
+    localStorage.setItem("finder-fakeFS", JSON.stringify(event.data.fs));
+  }
+});
+
 function openApp(name) {
     let windowsSection = document.querySelector('.windows-section');
     
@@ -310,7 +330,6 @@ function openApp(name) {
         }
     }
 
-    // General window button handlers
     function handleClose(windowClass, minimizedKey) {
         document.querySelector(".currently-focused-instance-name").textContent = 'Finder';
         localStorage.setItem(minimizedKey, "false");
@@ -340,7 +359,7 @@ function openApp(name) {
             win.style.height = "50%";
             win.style.width = "50%";
         } else {
-            win.style.height = "79.5vh";
+            win.style.height = "80.7vh";
             win.style.width = "100vw";
             win.style.marginTop = "-31px";
             win.style.position = "absolute";
@@ -393,20 +412,24 @@ function openApp(name) {
             if (expandBtn) expandBtn.onclick = () => handleExpand('finder-window', 'finderMinimized');
         }, 50);
 
-        // --- Finder file system simulation with persistence ---
-        let fakeFS = JSON.parse(localStorage.getItem('finder-fakeFS')) || {
-            '/': [
-                { name: 'Documents', type: 'folder' },
-                { name: 'Downloads', type: 'folder' },
-                { name: 'Pictures', type: 'folder' },
-                { name: 'Music', type: 'folder' },
-                { name: 'Readme.txt', type: 'file' },
+        if (!localStorage.getItem("finder-fakeFS")) {
+        const defaultFS = {
+            "/": [
+            { name: "Documents", type: "folder" },
+            { name: "Downloads", type: "folder" },
+            { name: "Pictures", type: "folder" },
+            { name: "Music", type: "folder" },
+            { name: "Readme.txt", type: "file" }
             ],
-            '/Documents': [],
-            '/Downloads': [],
-            '/Pictures': [],
-            '/Music': [],
+            "/Documents": [],
+            "/Downloads": [],
+            "/Pictures": [],
+            "/Music": []
         };
+        localStorage.setItem("finder-fakeFS", JSON.stringify(defaultFS));
+        }
+
+        let fakeFS = JSON.parse(localStorage.getItem('finder-fakeFS'));
         let currentPath = '/';
 
         function saveFS() {
@@ -435,6 +458,7 @@ function openApp(name) {
         }
 
         function renderFileList(path, focusNewName = null, focusType = null) {
+            let fakeFS = JSON.parse(localStorage.getItem('finder-fakeFS'));
             const fileList = document.getElementById('finder-file-list');
             if (!fileList) return;
             fileList.innerHTML = '';
@@ -827,7 +851,7 @@ function openApp(name) {
                     <button class="safari-refresh-btn" title="Refresh">⟳</button>
                 </div>
                 <div class="safari-iframe-container">
-                    <iframe class="safari-iframe" src="https://example.com" width="100%" height="100%" frameborder="0"></iframe>
+                    <iframe class="safari-iframe" src="https://example.com" width="100%" height="auto" frameborder="0"></iframe>
                     <div class="safari-iframe-error"></div>
                 </div>
             </div>
@@ -952,6 +976,30 @@ function openApp(name) {
         setInterval(() => setupDraggable('vscode'), 1)
 
         localStorage.setItem('currentFocus', 'VSCode')
+        document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus');
+    } else if (name == 'sentrix' && localStorage.getItem('sentrixMinimized') != 'true') {
+        windowsSection.innerHTML += `
+            <div class="window sentrix-window">
+                <div class="window-top-bar sentrix-window-top-bar">
+                    <button class="window-top-bar-button sentrix-window-top-bar-button close" style="margin-left: 20px;"></button>
+                    <button class="window-top-bar-button sentrix-window-top-bar-button minimize"></button>
+                    <button class="window-top-bar-button sentrix-window-top-bar-button expand"></button>
+                </div>
+                <iframe src="https://sentrix.vercel.app" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        `;
+        setTimeout(() => {
+            const closeBtn = document.querySelector('.sentrix-window .sentrix-window-top-bar-button.close');
+            const minimizeBtn = document.querySelector('.sentrix-window .sentrix-window-top-bar-button.minimize');
+            const expandBtn = document.querySelector('.sentrix-window .sentrix-window-top-bar-button.expand');
+            if (closeBtn) closeBtn.onclick = () => handleClose('sentrix-window', 'sentrixMinimized');
+            if (minimizeBtn) minimizeBtn.onclick = () => handleMinimize('sentrix-window', 'sentrixMinimized', 'Sentrix');
+            if (expandBtn) expandBtn.onclick = () => handleExpand('sentrix-window', 'sentrixMinimized');
+        }, 50);
+
+        setInterval(() => setupDraggable('sentrix'), 1)
+
+        localStorage.setItem('currentFocus', 'Sentrix')
         document.querySelector(".currently-focused-instance-name").textContent = localStorage.getItem('currentFocus');
     } else if (name == 'calculator' && localStorage.getItem('calculatorMinimized') != 'true') {
         windowsSection.innerHTML += `
